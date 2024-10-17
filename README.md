@@ -1,1 +1,5 @@
-# streamelements_integration
+# Python Integration for StreamElements
+
+
+# Contributor
+@maralasar
