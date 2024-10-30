@@ -1,0 +1,19 @@
+FROM python:3.11-slim
+LABEL maintainer=maralasar
+
+RUN apt update && apt install -y git
+
+RUN pip install --user --upgrade pip --no-cache-dir
+
+RUN mkdir /seingester
+WORKDIR /seingester
+
+
+# create install necessary packages
+COPY ./requirements.txt ./pyproject.toml ./README.md ./
+COPY . .
+
+RUN pip install . --no-cache-dir
+
+
+CMD ["python3", "docker/streamelements/run.py"]

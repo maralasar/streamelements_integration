@@ -1,0 +1,15 @@
+version: 1.0
+ingests:
+  streamelements:
+    parser: event_worker.streamelements.StreamelementsParser
+
+writers:
+  mongoDB:
+    class: event_worker.writer.mongowriter.DBWriter
+    host: mongodb
+    port: 27017
+    username: user
+    password: passwd
+  file:
+    class: event_worker.writer.filewriter.FileWriter
+    # filepath: ./file_writer_output.jsonl

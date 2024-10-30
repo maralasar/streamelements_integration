@@ -1,0 +1,87 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto
+    hostname: ${MQTT_HOST}
+    container_name: mosquitto
+    restart: unless-stopped
+    ports:
+      - ${MQTT_PORT}:${MQTT_PORT}
+    volumes:
+      - ./docker/mosquitto:/etc/mosquitto
+      - ./docker/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+    networks:
+      - backend
+
+
+  mongo:
+    image: mongo
+    hostname: mongo
+    container_name: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWD}
+    volumes:
+      - ./mongodb:/data/db
+    networks:
+      - backend
+
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    depends_on:
+      - mongo
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USER}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWD}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USER}:${MONGO_PASSWD}@mongo:27017/
+      ME_CONFIG_BASICAUTH_USERNAME: ${ME_USER}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${ME_PASSWD}
+    networks:
+      - backend
+      - frontend
+
+  se-ingest:
+    # image: se-ingest:latest
+    build:
+      dockerfile: ./Dockerfile-SE-Ingest
+    restart: on-failure:5
+    environment:
+      SE_CLIENT_JWT: ${JWT}
+      SE_CLIENT_MQTT_HOST: ${MQTT_HOST}
+      SE_CLIENT_MQTT_PORT: ${MQTT_PORT}
+      SE_CLIENT_MQTT_USER: ${MQTT_USER}
+      SE_CLIENT_MQTT_PASSWD: ${MQTT_PASSWD}
+      SE_CLIENT_LOG_LEVEL: ${LOG_LEVEL}
+    networks:
+      - backend
+
+  digester:
+    build:
+      dockerfile: ./Dockerfile-Digest
+    restart: on-failure:5
+    depends_on:
+      - mongo
+    environment:
+      DIGESTER_MQTT_HOST: ${MQTT_HOST}
+      DIGESTER_MQTT_PORT: ${MQTT_PORT}
+      DIGESTER_MQTT_USER: ${MQTT_USER}
+      DIGESTER_MQTT_PASSWD: ${MQTT_PASSWD}
+      DIGESTER_LOG_LEVEL: ${LOG_LEVEL}
+      DIGESTER_MONGO_URI: mongodb://${MONGO_USER}:${MONGO_PASSWD}@mongo:27017
+    volumes:
+      - ./docker/digester/example_config.yaml:/digester/config.yaml
+      - ./output/:/digester/output/
+    networks:
+      - backend
+
+networks:
+  backend:
+    name: backend
+  frontend:
+    name: frontend

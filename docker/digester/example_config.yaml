@@ -1,0 +1,20 @@
+version: 1.0
+ingests:
+  streamelements:
+    parser: event_worker.streamelements.StreamelementsParser
+
+writers:
+  mongoDB:
+    class: event_worker.writer.mongowriter.DBWriter
+    # It is likely better (and safer) to supply the MongoDB information
+    # via environment variable "DIGESTER_MONGO_URI = mongodb://dbuser:passwd@localhost:27017"
+    host: mongodb
+    port: 27017
+    user: dbuser
+    password: passwd
+  # file:
+    # class: event_worker.writer.filewriter.FileWriter
+    # The according path needs to be mounted accordingly, so you can actually access the file outside the container.
+    # The default mounting point should look like  "./output/:/digester/output/"
+    # filepath: ./file_writer_output.jsonl
+
