@@ -20,7 +20,7 @@ def main():
         raise ValueError("SE_CLIENT_GUID was not provided and could not "
                          "be retrieved from API")
 
-    socket = Websocket()
+    socket = Websocket(reconnection_attempts=5)
     socket.connect()
     socket.wait()
 

@@ -54,7 +54,8 @@ class StreamelementsParser(Parser):
                 tier=data.get("tier", None),
                 quantity=data.get("quantity", None),
                 gifted=data.get("gifted", None),
-                avatar=data.get("avatar", None), )
+                avatar=data.get("avatar", None),
+                sender=data.get("sender", None),)
 
         elif event_type == "communityGiftPurchase":
             writer_event.data = EventData(
