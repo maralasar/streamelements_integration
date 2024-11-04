@@ -11,6 +11,7 @@ class Websocket(socketio.Client):
         kwargs.update({"logger": logging.getLogger(__name__ + ".socketio"),
                        "engineio_logger": logging.getLogger(__name__ + ".engineio")
                        })
+        kwargs["engineio_logger"].setLevel(logging.WARNING)
         super().__init__(*args, **kwargs)
 
         self.mqtt_client = mqtt.Client(protocol=5)
@@ -64,21 +65,21 @@ class Websocket(socketio.Client):
         self.logger.info(f'Unauthorized: {data}')
 
     def handle_event_test(self, *data):
-        self.logger.info(f'Event test: {data}')
+        self.logger.debug(f'Event test: {data}')
 
     def handle_event(self, *data):
-        self.logger.info(f'Event: {data}')
+        self.logger.int(f'Event: {data}')
         content, info = data
         event_type = content.get('type')
-        topic = f"/streamelements/event/{event_type}"
-        self.logger.debug(f"sending {content} to MQTT {topic}")
+        topic = f"/streamelements-socket/event/{event_type}"
+        # self.logger.debug(f"sending {content} to MQTT {topic}")
         self.mqtt_client.publish(topic, payload=json.dumps(content))
 
     def handle_event_update(self, *data):
-        self.logger.info(f'Session update: {data}')
+        self.logger.debug(f'Session update: {data}')
 
     def handle_event_reset(self, *data):
-        self.logger.info(f'Session reset: {data}')
+        self.logger.debug(f'Session reset: {data}')
 
     def handle_catch_all(self, *data):
-        self.logger.info(f'Received an uncaught event: {data}')
+        self.logger.debug(f'Received an uncaught event: {data}')
