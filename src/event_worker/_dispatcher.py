@@ -39,7 +39,6 @@ class Dispatcher(mqtt.Client):
         self.on_connect = on_connect
         self.on_disconnect = on_disconnect
         self.on_connect_fail = on_connect_fail
-
     def __enter__(self):
         self.connect(host=os.environ.get('DIGESTER_MQTT_HOST'),
                      port=int(os.environ.get('DIGESTER_MQTT_PORT', 1883)))
@@ -54,12 +53,14 @@ class Dispatcher(mqtt.Client):
         self.disconnect()
 
 
+
 def on_connect(client: Dispatcher, userdata: Any, flags,
                rc: mqtt.ReasonCode, properties: mqtt.Properties = None):
     client.logger.info("Connected to MQTT")
     # subscribe to all mqtt topics
     for source, cfg in client.config.get("ingests").items():
         client.subscribe(f"/{source}/#")
+        client.logger.info(f"Subscribed to /{source}/#")
 
 
 def on_disconnect(client: Dispatcher, userdata: Any,

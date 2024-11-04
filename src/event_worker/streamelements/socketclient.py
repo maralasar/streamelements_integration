@@ -68,7 +68,7 @@ class Websocket(socketio.Client):
         self.logger.debug(f'Event test: {data}')
 
     def handle_event(self, *data):
-        self.logger.int(f'Event: {data}')
+        self.logger.info(f'Event: {data}')
         content, info = data
         event_type = content.get('type')
         topic = f"/streamelements-socket/event/{event_type}"
