@@ -1,7 +1,9 @@
 version: 1.0
 ingests:
-  streamelements:
-    parser: event_worker.streamelements.StreamelementsParser
+  streamelements-socket:
+    parser: event_worker.streamelements.SocketParser
+  streamelements-api:
+    parser: event_worker.streamelements.APIParser
 
 writers:
   mongoDB:

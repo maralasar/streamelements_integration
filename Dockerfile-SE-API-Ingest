@@ -5,8 +5,8 @@ RUN apt update && apt install -y git
 
 RUN pip install --user --upgrade pip --no-cache-dir
 
-RUN mkdir /seingester
-WORKDIR /seingester
+RUN mkdir /app
+WORKDIR /app
 
 
 # create install necessary packages
@@ -16,4 +16,4 @@ COPY . .
 RUN pip install . --no-cache-dir
 
 
-CMD ["python3", "docker/streamelements/run.py"]
+CMD ["python3", "docker/streamelements-api/run.py"]

@@ -46,11 +46,12 @@ services:
       - backend
       - frontend
 
-  se-ingest:
+  se-socket-ingest:
     # image: se-ingest:latest
     build:
-      dockerfile: ./Dockerfile-SE-Ingest
+      dockerfile: Dockerfile-SE-Socket-Ingest
     restart: on-failure:5
+    container_name: se-socket-ingest
     environment:
       SE_CLIENT_JWT: ${JWT}
       SE_CLIENT_MQTT_HOST: ${MQTT_HOST}
@@ -58,6 +59,24 @@ services:
       SE_CLIENT_MQTT_USER: ${MQTT_USER}
       SE_CLIENT_MQTT_PASSWD: ${MQTT_PASSWD}
       SE_CLIENT_LOG_LEVEL: ${LOG_LEVEL}
+    networks:
+      - backend
+
+  se-api-ingest:
+    build:
+      dockerfile: Dockerfile-SE-API-Ingest
+    container_name: se-api-ingest
+    environment:
+      SE_API_DATE_START: 2024-11-04T16:00.000Z
+      SE_API_SLEEP: 300
+      SE_API_REQUEST_WINDOW: 600
+      SE_API_THROTTLE: 2
+      SE_API_JWT: ${JWT}
+      SE_API_MQTT_HOST: ${MQTT_HOST}
+      SE_API_MQTT_PORT: ${MQTT_PORT}
+      SE_API_MQTT_USER: ${MQTT_USER}
+      SE_API_MQTT_PASSWD: ${MQTT_PASSWD}
+      SE_API_LOG_LEVEL: ${LOG_LEVEL}
     networks:
       - backend
 
@@ -75,8 +94,8 @@ services:
       DIGESTER_LOG_LEVEL: ${LOG_LEVEL}
       DIGESTER_MONGO_URI: mongodb://${MONGO_USER}:${MONGO_PASSWD}@mongo:27017
     volumes:
-      - ./docker/digester/example_config.yaml:/digester/config.yaml
-      - ./output/:/digester/output/
+      - ./docker/digester/config.yaml:/app/config.yaml
+      - ./output/:/app/output/
     networks:
       - backend
 

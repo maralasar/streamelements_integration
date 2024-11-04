@@ -116,7 +116,7 @@ class Activities(GuidEndpoint):
             "types": types
         }
 
-        self.logger.info(f"Requesting channel activities: {params}")
+        self.logger.debug(f"Requesting channel activities: {params}")
 
         response = httpx.get(url.geturl(), headers=self.headers, params=params)
         response.raise_for_status()

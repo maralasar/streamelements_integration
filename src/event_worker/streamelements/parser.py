@@ -2,6 +2,7 @@ import datetime as dt
 import logging
 
 from pydantic import BaseModel, field_serializer
+from pydantic.v1 import PastDate
 
 from event_worker.writer.models import WriterEvent, EventData, Parser
 
@@ -23,8 +24,24 @@ class InputEvent(BaseModel):
     def serialize_dt(self, date: dt.datetime, _info) -> str:
         return date.isoformat()
 
+class APIParser(Parser):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-class StreamelementsParser(Parser):
+    def __call__(self, event_type: str, **event_data):
+        writer_event = WriterEvent(
+            source="streamelements-api",eventType=event_type,
+            eventId=event_data["_id"],
+            channel=event_data.get("channel", None),
+            dataProvider=event_data.get("provider", None),
+            createdAt=event_data.get("createdAt", None),
+            updatedAt=event_data.get("updatedAt", None),
+            data=EventData(**event_data["data"])
+        )
+
+        return writer_event
+
+class SocketParser(Parser):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
