@@ -2,7 +2,6 @@ import datetime as dt
 import logging
 
 from pydantic import BaseModel, field_serializer
-from pydantic.v1 import PastDate
 
 from event_worker.writer.models import WriterEvent, EventData, Parser
 
@@ -33,6 +32,7 @@ class APIParser(Parser):
             source="streamelements-api",eventType=event_type,
             eventId=event_data["_id"],
             channel=event_data.get("channel", None),
+            eventGroup=event_data.get("activityGroup", None),
             dataProvider=event_data.get("provider", None),
             createdAt=event_data.get("createdAt", None),
             updatedAt=event_data.get("updatedAt", None),

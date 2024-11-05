@@ -5,7 +5,7 @@ services:
     container_name: mosquitto
     restart: unless-stopped
     ports:
-      - ${MQTT_PORT}:${MQTT_PORT}
+      - 1883:${MQTT_PORT}
     volumes:
       - ./docker/mosquitto:/etc/mosquitto
       - ./docker/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
@@ -14,23 +14,24 @@ services:
 
 
   mongo:
-    image: mongo
+    image: mongo:4
     hostname: mongo
     container_name: mongo
     restart: always
-    ports:
-      - 27017:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWD}
+    ports:
+      - "27017:27017"
     volumes:
-      - ./mongodb:/data/db
+      - ./mongodb/mongodb:/data/db
     networks:
       - backend
 
 
   mongo-express:
     image: mongo-express
+    container_name: mongo-express
     restart: always
     depends_on:
       - mongo
@@ -46,12 +47,13 @@ services:
       - backend
       - frontend
 
-  se-socket-ingest:
-    # image: se-ingest:latest
-    build:
-      dockerfile: Dockerfile-SE-Socket-Ingest
-    restart: on-failure:5
-    container_name: se-socket-ingest
+  se-socket-ingester:
+    image: se-socket-ingester:latest
+    container_name: se-socket-ingester
+    restart: on-failure:3
+    depends_on:
+      - digester
+      - mosquitto
     environment:
       SE_CLIENT_JWT: ${JWT}
       SE_CLIENT_MQTT_HOST: ${MQTT_HOST}
@@ -61,11 +63,19 @@ services:
       SE_CLIENT_LOG_LEVEL: ${LOG_LEVEL}
     networks:
       - backend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 10m
+        max-file: "3"
 
-  se-api-ingest:
-    build:
-      dockerfile: Dockerfile-SE-API-Ingest
-    container_name: se-api-ingest
+  se-api-ingester:
+    image: se-api-ingester:latest
+    container_name: se-api-ingester
+    restart: on-failure:3
+    depends_on:
+      - digester
+      - mosquitto
     environment:
       SE_API_DATE_START: 2024-11-04T16:00.000Z
       SE_API_SLEEP: 300
@@ -79,13 +89,20 @@ services:
       SE_API_LOG_LEVEL: ${LOG_LEVEL}
     networks:
       - backend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 10m
+        max-file: "3"
 
   digester:
-    build:
-      dockerfile: ./Dockerfile-Digest
+    user: 1000:1000
+    image: digester:latest
+    container_name: digester
     restart: on-failure:5
     depends_on:
       - mongo
+      - mosquitto
     environment:
       DIGESTER_MQTT_HOST: ${MQTT_HOST}
       DIGESTER_MQTT_PORT: ${MQTT_PORT}
@@ -98,9 +115,16 @@ services:
       - ./output/:/app/output/
     networks:
       - backend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 10m
+        max-file: "3"
 
 networks:
   backend:
     name: backend
+    driver: bridge
   frontend:
     name: frontend
+    driver: bridge
