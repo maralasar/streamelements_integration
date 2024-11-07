@@ -36,7 +36,8 @@ class APIParser(Parser):
             dataProvider=event_data.get("provider", None),
             createdAt=event_data.get("createdAt", None),
             updatedAt=event_data.get("updatedAt", None),
-            data=EventData(**event_data["data"])
+            data=EventData(**event_data["data"]),
+            flags=event_data.get("flags", None),
         )
 
         return writer_event

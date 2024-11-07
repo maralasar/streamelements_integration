@@ -1,12 +1,14 @@
 import abc
 import datetime as dt
-from pydantic import BaseModel, field_serializer, AnyHttpUrl
+from numbers import Number
+
+from pydantic import BaseModel, field_serializer, AnyHttpUrl, NonNegativeInt, NonNegativeFloat
 
 from typing import Any
 
 
 class EventData(BaseModel):
-    amount: int | None = None
+    amount: NonNegativeInt | NonNegativeFloat | None = None
     avatar: AnyHttpUrl | str | None = None
     displayName: str | None = None
     username: str | None = None
@@ -31,6 +33,7 @@ class WriterEvent(BaseModel):
     data: EventData | None = None
     eventCount: int | None = None
     isMock: bool | None = False
+    flags: Any | None = None
 
     @field_serializer("createdAt", "updatedAt")
     def serialize_dt(self, date: dt.datetime, _info) -> str:
