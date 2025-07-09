@@ -38,7 +38,7 @@ def main():
             time.sleep(throttle_time)
 
             if date_last_datapoint >= dt.datetime.now(tz=dt.timezone.utc):
-                _logger.info("Last request window extended into the future. Choose SE_API_SLEEP larger than SE_API_REQUEST_WINDOW")
+                _logger.debug("Last request window extended into the future. Choose SE_API_SLEEP larger than SE_API_REQUEST_WINDOW")
             after = min(date_last_datapoint, data_last_iter)
 
             if after >= data_last_iter - dt.timedelta(seconds=sleep_time):
